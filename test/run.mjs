@@ -240,7 +240,10 @@ assert.match(state.message, /Waiting for the presentation/)
 step('the shortcut pressed in the panel starts it again')
 await page.evaluate(() => {
   const doc = documentPictureInPicture.window.document
-  doc.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'π', code: 'KeyP', keyCode: 80, metaKey: true, altKey: true, bubbles: true }))
+  const isApple = /Mac|iPhone|iPad/.test(navigator.platform)
+  doc.body.dispatchEvent(
+    new KeyboardEvent('keydown', { key: 'p', code: 'KeyP', keyCode: 80, metaKey: isApple, ctrlKey: !isApple, altKey: true, bubbles: true }),
+  )
 })
 await page.waitForSelector('[data-presentation-mode]')
 await settle()

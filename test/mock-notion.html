@@ -135,8 +135,14 @@
     render()
   }
 
+  // Notion's "command+alt+p" means the Command key on a Mac and Ctrl elsewhere
+  const isApple = /Mac|iPhone|iPad/.test(navigator.platform)
+  const isPresentShortcut = (event) =>
+    event.keyCode === 80 && event.altKey && !event.shiftKey &&
+    (isApple ? event.metaKey && !event.ctrlKey : event.ctrlKey)
+
   window.addEventListener('keydown', (event) => {
-    if (event.keyCode === 80 && event.metaKey && event.altKey && !event.ctrlKey && !event.shiftKey) {
+    if (isPresentShortcut(event)) {
       event.preventDefault()
       openPresentation()
       return
