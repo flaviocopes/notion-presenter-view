@@ -11,7 +11,7 @@ stage="dist/$name"
 
 rm -rf dist
 mkdir -p "$stage/icons"
-cp manifest.json background.js presenter.js LICENSE "$stage/"
+cp manifest.json background.js presenter.js toggle.js LICENSE "$stage/"
 for icon in $icons; do cp "$icon" "$stage/icons/"; done
 
 # Fixed timestamps, permissions and file order, so the same commit gives the same zip on any machine

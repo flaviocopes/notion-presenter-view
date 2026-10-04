@@ -23,7 +23,7 @@ await mkdir(shots, { recursive: true })
 // Headless there's no toolbar click to grant activeTab, so the test copy of
 // the extension gets a host permission for the mock page instead.
 await mkdir(extension, { recursive: true })
-for (const file of ['manifest.json', 'background.js', 'presenter.js', 'icons']) {
+for (const file of ['manifest.json', 'background.js', 'presenter.js', 'toggle.js', 'icons']) {
   await cp(path.join(source, file), path.join(extension, file), { recursive: true })
 }
 const manifest = JSON.parse(await readFile(path.join(extension, 'manifest.json'), 'utf8'))
@@ -69,15 +69,17 @@ await page.goto('https://app.notion.com/Q4-Planning-1a2b3c4d')
 
 const step = (name) => console.log(`- ${name}`)
 
-// The toolbar button can't be clicked headless. Inject the script the way the
-// background worker does: without a user gesture the panel can't open yet.
-step('inject presenter.js without a gesture')
-await worker.evaluate(async () => {
-  const [tab] = await chrome.tabs.query({ url: 'https://app.notion.com/*' })
-  await chrome.scripting.executeScript({ target: { tabId: tab.id }, world: 'MAIN', files: ['presenter.js'] })
-})
-assert.equal(await page.evaluate(() => typeof window.__notionPresenterView?.toggle), 'function')
+const cornerButton = () =>
+  page.evaluate(() => {
+    const host = document.getElementById('notion-presenter-view')
+    const button = host?.shadowRoot.querySelector('button')
+    return { shown: host?.style.display === 'block', visible: Boolean(button?.classList.contains('visible')) }
+  })
+
+step('presenter.js loads with the page and leaves the panel closed')
+await page.waitForFunction(() => typeof window.__notionPresenterView?.toggle === 'function')
 assert.equal(await page.evaluate(() => Boolean(documentPictureInPicture.window)), false)
+assert.equal((await cornerButton()).shown, false, 'no corner button outside a presentation')
 
 // A real click in the page gives the user activation the toolbar click gives.
 step('open the panel with a user gesture')
@@ -249,15 +251,75 @@ await page.waitForSelector('[data-presentation-mode]')
 await settle()
 assert.equal((await panel()).count, 'Slide 1 of 5')
 
-step('toggling again closes the panel')
-await page.click('#test-toggle', { force: true })
-await page.waitForFunction(() => !documentPictureInPicture.window)
+step('the corner button stays hidden while the panel is open')
+assert.equal((await cornerButton()).shown, false)
 
-step('re-injecting the script toggles instead of redefining it')
+// Headless Chromium keeps every tab visible and focused, so these steps fake
+// what a real tab or app switch looks like to the page.
+step('focus moving from the page to the panel keeps the panel open')
+await page.evaluate(() => {
+  document.hasFocus = () => false
+  window.dispatchEvent(new Event('blur'))
+})
+await page.waitForTimeout(800)
+assert.equal(await page.evaluate(() => Boolean(documentPictureInPicture.window)), true)
+
+step('focus leaving both the page and the panel closes the panel')
+await page.evaluate(() => {
+  documentPictureInPicture.window.document.hasFocus = () => false
+  documentPictureInPicture.window.dispatchEvent(new Event('blur'))
+})
+await page.waitForFunction(() => !documentPictureInPicture.window, null, { timeout: 5000 })
+await page.evaluate(() => delete document.hasFocus)
+
+step('switching to another tab closes the panel')
 await page.click('#test-toggle', { force: true })
 await page.waitForFunction(() => Boolean(documentPictureInPicture.window))
-await page.evaluate(() => documentPictureInPicture.window.close())
+await page.evaluate(() => {
+  Object.defineProperty(document, 'hidden', { configurable: true, get: () => true })
+  document.dispatchEvent(new Event('visibilitychange'))
+})
+await page.waitForFunction(() => !documentPictureInPicture.window, null, { timeout: 5000 })
+await page.evaluate(() => delete document.hidden)
+
+step('presenting without the panel shows the corner button when the mouse moves')
+await page.mouse.move(200, 300)
+await page.mouse.move(400, 500)
+await page.waitForFunction(() => document.getElementById('notion-presenter-view')?.shadowRoot.querySelector('button.visible'))
+assert.deepEqual(await cornerButton(), { shown: true, visible: true })
+await page.waitForTimeout(350)
+await page.screenshot({ path: path.join(shots, '7-corner-button.png') })
+
+step('the corner button fades out when the mouse stops')
+await page.waitForFunction(() => !document.getElementById('notion-presenter-view').shadowRoot.querySelector('button.visible'), null, { timeout: 4000 })
+
+step('clicking the corner button opens the panel on the current slide')
+await page.mouse.move(300, 300)
+await page.locator('#notion-presenter-view button').click()
+await page.waitForFunction(() => Boolean(documentPictureInPicture.window))
+await settle()
+state = await panel()
+assert.equal(state.count, 'Slide 1 of 5')
+assert.match(state.slide, /Where we are/)
+assert.equal((await cornerButton()).shown, false)
+
+step('the toolbar path toggles the panel off without loading presenter.js twice')
+await page.evaluate(() => {
+  window.__firstLoad = window.__notionPresenterView
+})
+await worker.evaluate(async () => {
+  const [tab] = await chrome.tabs.query({ url: 'https://app.notion.com/*' })
+  await chrome.scripting.executeScript({ target: { tabId: tab.id }, world: 'MAIN', files: ['presenter.js', 'toggle.js'] })
+})
 await page.waitForFunction(() => !documentPictureInPicture.window)
+assert.equal(await page.evaluate(() => window.__firstLoad === window.__notionPresenterView), true)
+
+step('ending the presentation hides the corner button')
+await page.evaluate(() => document.fullscreenElement && document.exitFullscreen())
+await page.keyboard.press('Escape')
+await page.waitForFunction(() => !document.querySelector('[data-presentation-mode]'))
+await page.waitForTimeout(700)
+assert.equal((await cornerButton()).shown, false)
 
 await context.close()
 server.close()

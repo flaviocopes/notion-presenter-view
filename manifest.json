@@ -1,13 +1,21 @@
 {
   "manifest_version": 3,
   "name": "Notion Presenter View",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Shows the next slide of a Notion presentation in a floating window that stays on top of the fullscreen slides.",
   "minimum_chrome_version": "116",
   "permissions": ["activeTab", "scripting"],
   "background": {
     "service_worker": "background.js"
   },
+  "content_scripts": [
+    {
+      "matches": ["https://*.notion.so/*", "https://*.notion.com/*", "https://*.notion.site/*"],
+      "js": ["presenter.js"],
+      "world": "MAIN",
+      "run_at": "document_idle"
+    }
+  ],
   "action": {
     "default_title": "Notion presenter view",
     "default_icon": {

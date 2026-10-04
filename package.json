@@ -1,7 +1,7 @@
 {
   "name": "notion-presenter-view",
   "productName": "Notion Presenter View",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Chrome extension that shows the next slide of a Notion presentation in a floating window",
   "type": "module",

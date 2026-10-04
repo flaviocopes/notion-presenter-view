@@ -1,8 +1,8 @@
+// Loads with every Notion page as a content script in the page's main world.
+// It shows the "Open presenter view" button while you present, and toggle.js
+// opens or closes the panel when you click the toolbar button or press the shortcut.
 (() => {
-  if (window.__notionPresenterView) {
-    window.__notionPresenterView.toggle()
-    return
-  }
+  if (window.__notionPresenterView) return
 
   const isApple = /Mac|iPhone|iPad/.test(navigator.platform)
   const startShortcut = isApple ? '⌘⌥P' : 'Ctrl+Alt+P'
@@ -128,6 +128,8 @@
   let timer = 0
   let renderedKey = null
   let messageKind = null
+  let leaveTimer = 0
+  let fullscreenChangedAt = 0
 
   function toggle() {
     if (pip) pip.close()
@@ -142,6 +144,7 @@
     }
 
     opening = true
+    updateButton()
     try {
       pip = await documentPictureInPicture.requestWindow({
         width: 520,
@@ -153,16 +156,20 @@
       return
     } finally {
       opening = false
+      if (!pip) updateButton()
     }
 
     buildPanel()
     pip.addEventListener('pagehide', close)
     pip.addEventListener('resize', fit)
+    pip.addEventListener('blur', checkStillHere)
     pip.document.addEventListener('keydown', onPanelKeydown)
     pip.document.addEventListener('click', onPanelClick)
     window.addEventListener('keydown', onPageKeydown, true)
     window.addEventListener('resize', fit)
-    document.addEventListener('fullscreenchange', update)
+    window.addEventListener('blur', checkStillHere)
+    document.addEventListener('visibilitychange', checkStillHere)
+    document.addEventListener('fullscreenchange', onFullscreenChange)
 
     observer = new MutationObserver(scheduleUpdate)
     observer.observe(document.body, {
@@ -176,22 +183,46 @@
     resizeObserver.observe(ui.content)
 
     update()
+    updateButton()
   }
 
   function close() {
     observer?.disconnect()
     resizeObserver?.disconnect()
     clearTimeout(timer)
+    clearTimeout(leaveTimer)
     window.removeEventListener('keydown', onPageKeydown, true)
     window.removeEventListener('resize', fit)
-    document.removeEventListener('fullscreenchange', update)
+    window.removeEventListener('blur', checkStillHere)
+    document.removeEventListener('visibilitychange', checkStillHere)
+    document.removeEventListener('fullscreenchange', onFullscreenChange)
     pip = null
     ui = null
     observer = null
     resizeObserver = null
     timer = 0
+    leaveTimer = 0
     renderedKey = null
     messageKind = null
+    updateButton()
+  }
+
+  function onFullscreenChange() {
+    fullscreenChangedAt = performance.now()
+    update()
+  }
+
+  // The panel is only for the Notion tab: it closes when you switch to another
+  // tab, window or app. Focus can flicker while macOS animates in and out of
+  // fullscreen, so right after a fullscreen change we wait and check again.
+  function checkStillHere() {
+    clearTimeout(leaveTimer)
+    leaveTimer = setTimeout(() => {
+      if (!pip) return
+      if (performance.now() - fullscreenChangedAt < 1500) return checkStillHere()
+      const here = !document.hidden && (document.hasFocus() || pip.document.hasFocus())
+      if (!here) pip.close()
+    }, 500)
   }
 
   function buildPanel() {
@@ -461,6 +492,92 @@
     }
   }
 
+  // The corner button the presenter sees while presenting without the panel.
+  // Like Notion's own controls, it fades out when the mouse stops moving, so
+  // it doesn't sit on the slides the audience sees.
+  const buttonCss = `
+    button {
+      all: initial;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px 8px 10px;
+      border-radius: 10px;
+      background: #191919;
+      color: #fff;
+      font: 500 14px/1.2 -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 6px 20px rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    button.visible { opacity: 1; pointer-events: auto; }
+    button:hover { background: #2a2a2a; }
+    svg { width: 20px; height: 20px; flex: none; }
+  `
+
+  const buttonIcon = `
+    <svg viewBox="12 20 104 86" aria-hidden="true">
+      <rect x="16" y="24" width="66" height="46" rx="8" fill="#fff" fill-opacity="0.4"/>
+      <rect x="42" y="50" width="70" height="52" rx="9" fill="#2383e2"/>
+      <path d="M71 64 l12 12 l-12 12" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`
+
+  let button = null
+  let presenting = false
+  let buttonHovered = false
+  let buttonVisibleUntil = 0
+  let buttonTimer = 0
+
+  function setupButton() {
+    const host = document.createElement('div')
+    host.id = 'notion-presenter-view'
+    host.style.cssText = 'position: fixed; right: 24px; bottom: 24px; z-index: 2147483000; display: none;'
+    const shadow = host.attachShadow({ mode: 'open' })
+    shadow.innerHTML = `<style>${buttonCss}</style><button type="button">${buttonIcon}Open presenter view</button>`
+
+    const element = shadow.querySelector('button')
+    element.addEventListener('click', () => open())
+    element.addEventListener('mouseenter', () => {
+      buttonHovered = true
+      updateButton()
+    })
+    element.addEventListener('mouseleave', () => {
+      buttonHovered = false
+      showButtonFor(2000)
+    })
+
+    button = { host, element }
+    window.addEventListener('mousemove', () => showButtonFor(2000), { passive: true })
+    setInterval(checkPresenting, 500)
+    checkPresenting()
+  }
+
+  function checkPresenting() {
+    const now = Boolean(document.querySelector('[data-presentation-mode]'))
+    if (now && !presenting) showButtonFor(3000)
+    presenting = now
+    if (!button.host.isConnected) document.body.append(button.host)
+    updateButton()
+  }
+
+  function showButtonFor(duration) {
+    buttonVisibleUntil = performance.now() + duration
+    clearTimeout(buttonTimer)
+    buttonTimer = setTimeout(updateButton, duration + 20)
+    updateButton()
+  }
+
+  function updateButton() {
+    if (!button) return
+    const shown = presenting && !pip && !opening
+    const visible = shown && (buttonHovered || performance.now() < buttonVisibleUntil)
+    button.host.style.display = shown ? 'block' : 'none'
+    button.element.classList.toggle('visible', visible)
+  }
+
   window.__notionPresenterView = { toggle }
-  toggle()
+  setupButton()
 })()

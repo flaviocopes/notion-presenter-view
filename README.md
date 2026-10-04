@@ -10,8 +10,8 @@ Notion's presentation mode turns a page into slides, split at each divider. You 
 
 Notion Presenter View isn't on the Chrome Web Store, so you load it into Chrome yourself. It takes a minute.
 
-1. Get `Notion-Presenter-View-1.0.0.zip` from the [latest release](https://github.com/flaviocopes/notion-presenter-view/releases/latest) and unzip it.
-2. Move the `Notion-Presenter-View-1.0.0` folder somewhere it can stay, like your Documents folder. Chrome runs the extension from that folder, so if you delete it, the extension is gone.
+1. Get `Notion-Presenter-View-1.1.0.zip` from the [latest release](https://github.com/flaviocopes/notion-presenter-view/releases/latest) and unzip it.
+2. Move the `Notion-Presenter-View-1.1.0` folder somewhere it can stay, like your Documents folder. Chrome runs the extension from that folder, so if you delete it, the extension is gone.
 3. Open `chrome://extensions` and turn on **Developer mode** in the top right corner.
 4. Click **Load unpacked** and pick that folder.
 5. Click the puzzle icon in the toolbar and pin Notion Presenter View, so it's one click away.
@@ -33,7 +33,13 @@ To hear about new versions, click **Watch** on this repo, then **Custom** and **
 
 Change slides as usual, with the arrow keys, Space or a clicker. The panel shows the slide that comes next and where you are, like "Slide 3 of 12". On the last slide it tells you the presentation is over. Press the shortcut again to close the panel, or click its close button.
 
-> Open the panel before you start presenting. When a page opens a floating window, Chrome takes it out of fullscreen. If that happens, click the slides and press `F` to go back to fullscreen.
+The panel belongs to the Notion tab. When you switch to another tab, window or app, it closes.
+
+### Started without the panel?
+
+If you're presenting and the panel isn't open, move the mouse: an **Open presenter view** button shows up in the bottom right corner. Click it to open the panel. Like Notion's own controls, it fades out when the mouse stops moving.
+
+> When a page opens a floating window, Chrome takes it out of fullscreen. So if you open the panel while the slides are fullscreen, click the slides and press `F` to go back to fullscreen. Open the panel before you start presenting, and this doesn't come up.
 
 The panel has a **Start presenting** button too. Chrome doesn't let a click in the panel make the page fullscreen, so after it starts, click the slides and press `F`.
 
@@ -45,7 +51,8 @@ To change the shortcut, open `chrome://extensions/shortcuts`. Go there too if th
 
 - The next slide looks the way Notion will draw it on your screen, with its images, callouts and colors, in light or dark mode.
 - The panel shows where you are, like "Slide 3 of 12", and tells you when you reach the last slide.
-- It stays on top of the fullscreen slides and of every other app.
+- It stays on top of the fullscreen slides while you're in Notion, and closes when you switch to another tab, window or app.
+- If you start presenting without it, a button in the corner opens it.
 - If you click the panel, the arrow keys, Space, Page Up, Page Down, Escape and `R` still reach Notion, so your clicker keeps working.
 - Embeds show up as a gray box, so a video or a Figma file doesn't load a second time.
 
@@ -57,9 +64,9 @@ With a projector, set it up as a second display, put the slides on the projector
 
 ## Privacy
 
-Notion Presenter View asks Chrome for two permissions, `activeTab` and `scripting`, and Chrome shows no warning for them when you install it. Together they let the extension run on a page only when you press the shortcut or click its button there, and it only does that on Notion pages.
+Notion Presenter View runs on Notion pages only: `notion.so`, `notion.com` and `notion.site`. It needs them to show the **Open presenter view** button while you present, so when you install it, Chrome says it can "read and change your data" on those sites. It also asks for `activeTab` and `scripting`, which let the shortcut and the toolbar button open the panel.
 
-It reads the slides Notion already has in the page. It never goes online, and there are no accounts or analytics.
+It reads the slides Notion already has in the page and adds the corner button. It doesn't change your pages, it never goes online, and there are no accounts or analytics.
 
 Notion's presentation mode needs a Plus, Business or Enterprise plan. This extension isn't made by or affiliated with Notion.
 
@@ -93,9 +100,11 @@ Working with an AI coding agent? Point it at [AGENTS.md](AGENTS.md). It has the 
 
 Notion's presentation mode keeps three slides in the page: the previous one, the current one and the next one. Each sits in an element with a `data-slide-index` attribute, and only the current one has `aria-hidden="false"`. So the next slide is already there, fully drawn, just hidden.
 
-The shortcut is Chrome's `_execute_action` command, so the button and the shortcut fire the same `action.onClicked` event. The service worker in `background.js` then injects `presenter.js` into the page with `chrome.scripting.executeScript`. The click or the key press counts as a user gesture in the page, which the [Document Picture-in-Picture API](https://developer.chrome.com/docs/web-platform/document-picture-in-picture) needs to open its always-on-top window.
+`presenter.js` loads with every Notion page, in the page's own JavaScript world. It checks twice a second whether a presentation is running, and shows the corner button when it is and the panel isn't open.
 
-`presenter.js` copies Notion's stylesheets and theme colors into that window, clones the next slide into it and scales it the way Notion scales it on your screen. A `MutationObserver` updates it every time the slide changes. Notion matches its shortcuts on `keyCode`, so the keys you press in the panel are sent to the page as keyboard events with the right `keyCode`.
+The shortcut is Chrome's `_execute_action` command, so the button and the shortcut fire the same `action.onClicked` event. When it fires, the service worker in `background.js` runs `toggle.js` in the page with `chrome.scripting.executeScript`. Chrome counts that click or key press as a user gesture in the page, just like a click on the corner button, and the [Document Picture-in-Picture API](https://developer.chrome.com/docs/web-platform/document-picture-in-picture) needs one to open its always-on-top window.
+
+`presenter.js` copies Notion's stylesheets and theme colors into that window, clones the next slide into it and scales it the way Notion scales it on your screen. A `MutationObserver` updates it every time the slide changes. Notion matches its shortcuts on `keyCode`, so the keys you press in the panel are sent to the page as keyboard events with the right `keyCode`. When the page is hidden, or neither the page nor the panel has the focus, the panel closes.
 
 The fullscreen rule comes from Chrome. A page that opens a new window loses fullscreen, and a click in the panel doesn't count as a user gesture in the page. A key press on the slides does, so `F` asks for fullscreen again.
 
