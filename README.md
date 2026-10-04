@@ -4,7 +4,9 @@ Notion Presenter View is a Chrome extension that shows the next slide of a Notio
 
 Notion's presentation mode turns a page into slides, split at each divider. You see exactly what the audience sees, one slide at a time. There's no presenter view with the next slide, like Keynote and PowerPoint have, so this extension adds one.
 
-![The panel showing the next slide](docs/panel.png)
+Read the announcement and watch the 30-second demo on my blog: [I built Notion Presenter View, a Chrome extension that shows your next slide](https://flaviocopes.com/notion-presenter-view/).
+
+[![Watch the 30-second Notion Presenter View demo](docs/showreel-poster.jpg)](https://flaviocopes.com/notion-presenter-view/)
 
 ## Install
 
