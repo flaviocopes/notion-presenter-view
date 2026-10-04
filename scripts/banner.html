@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  html, body { background: transparent; }
+  body { font-family: system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+
+  .banner {
+    position: relative; width: 1280px; height: 560px; border-radius: 28px; overflow: hidden;
+    background:
+      radial-gradient(460px 420px at 18% 34%, rgba(35, 131, 226, 0.34), rgba(35, 131, 226, 0)),
+      radial-gradient(520px 420px at 92% 88%, rgba(35, 131, 226, 0.22), rgba(35, 131, 226, 0)),
+      linear-gradient(180deg, #232323, #121212);
+  }
+
+  .intro { position: absolute; left: 84px; top: 70px; color: #fff; }
+  .intro img { width: 120px; height: 120px; display: block; filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.45)); }
+  .intro h1 { margin-top: 26px; font-size: 64px; font-weight: 700; letter-spacing: -1.6px; line-height: 1.02; }
+  .intro p { margin-top: 16px; font-size: 25px; line-height: 1.32; color: rgba(255, 255, 255, 0.72); }
+  .chips { margin-top: 24px; display: flex; gap: 10px; }
+  .chips span {
+    font-size: 15px; font-weight: 600; color: rgba(255, 255, 255, 0.9); padding: 7px 14px; border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.16);
+  }
+
+  .screen {
+    position: absolute; left: 640px; top: 64px; width: 600px; height: 375px; border-radius: 12px; overflow: hidden;
+    background: #fff; color: #2c2c2b;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 40px 90px rgba(0, 0, 0, 0.55), 0 12px 30px rgba(0, 0, 0, 0.35);
+  }
+  .slide { position: absolute; left: 66px; top: 74px; right: 66px; }
+  .slide h2 { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; }
+  .slide p { margin-top: 14px; font-size: 16px; color: #37352f; }
+  .slide ul { margin-top: 10px; padding-left: 22px; font-size: 16px; line-height: 1.75; color: #37352f; }
+  .pill {
+    position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%);
+    font-size: 12px; color: #73726e; padding: 5px 12px; border-radius: 10px; background: #fff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .panel {
+    position: absolute; left: 912px; top: 268px; width: 336px; height: 250px; border-radius: 12px; overflow: hidden;
+    background: #191919; color: #e3e3e3;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 30px 70px rgba(0, 0, 0, 0.6), 0 10px 24px rgba(0, 0, 0, 0.4);
+  }
+  .titlebar { height: 26px; background: #262626; display: flex; align-items: center; padding: 0 10px; font-size: 11px; color: #9b9b9b; gap: 6px; }
+  .titlebar i { width: 9px; height: 9px; border-radius: 50%; background: #5a5a5a; }
+  .head { display: flex; align-items: center; padding: 11px 14px 0; }
+  .head b { font-size: 10px; letter-spacing: 0.08em; color: #8f8f8f; }
+  .head span { margin-left: auto; font-size: 12px; color: #bdbdbd; }
+  .card { position: absolute; left: 14px; right: 14px; top: 62px; bottom: 14px; border-radius: 6px; background: #fff; color: #2c2c2b; padding: 20px 26px; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12); }
+  .card h3 { font-size: 16px; font-weight: 700; }
+  .callout { margin-top: 9px; height: 18px; border-radius: 5px; background: #f8f8f7; display: flex; align-items: center; gap: 5px; padding: 0 7px; }
+  .callout i { width: 6px; height: 6px; border-radius: 50%; background: #e0a100; }
+  .callout s { height: 4px; width: 150px; border-radius: 2px; background: #c9c8c4; text-decoration: none; }
+  .chart { margin-top: 9px; height: 74px; border-radius: 4px; background: #f1f1ef; display: flex; align-items: flex-end; justify-content: space-around; padding: 8px 14px 0; }
+  .chart i { width: 26px; background: #2383e2; }
+</style>
+</head>
+<body>
+<div class="banner">
+  <div class="intro">
+    <img src="../icons/icon.svg" alt="">
+    <h1>Notion<br>Presenter View</h1>
+    <p>See the next slide while you<br>present a Notion page.</p>
+    <div class="chips"><span>Open with ⌥⇧P</span><span>Stays above fullscreen</span><span>Free and open source</span></div>
+  </div>
+
+  <div class="screen">
+    <div class="slide">
+      <h2>Where we are</h2>
+      <p>We shipped three of the four Q3 goals.</p>
+      <ul>
+        <li>New onboarding flow is live</li>
+        <li>Billing moved to annual plans</li>
+        <li>Mobile app beta reached 2,000 users</li>
+      </ul>
+    </div>
+    <div class="pill">2 of 5</div>
+  </div>
+
+  <div class="panel">
+    <div class="titlebar"><i></i>app.notion.com</div>
+    <div class="head"><b>UP NEXT</b><span>Slide 2 of 5</span></div>
+    <div class="card">
+      <h3>What we learned</h3>
+      <div class="callout"><i></i><s></s></div>
+      <div class="chart"><i style="height:22px"></i><i style="height:34px"></i><i style="height:48px"></i><i style="height:62px"></i></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
