@@ -261,7 +261,7 @@ await page.evaluate(() => {
   document.hasFocus = () => false
   window.dispatchEvent(new Event('blur'))
 })
-await page.waitForTimeout(800)
+await page.waitForTimeout(2200)
 assert.equal(await page.evaluate(() => Boolean(documentPictureInPicture.window)), true)
 
 step('focus leaving both the page and the panel closes the panel')

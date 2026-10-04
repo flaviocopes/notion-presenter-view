@@ -213,16 +213,17 @@
   }
 
   // The panel is only for the Notion tab: it closes when you switch to another
-  // tab, window or app. Focus can flicker while macOS animates in and out of
-  // fullscreen, so right after a fullscreen change we wait and check again.
+  // tab, window or app. When you click from the panel to the slides, macOS can
+  // leave both without focus for half a second, and focus can flicker while it
+  // animates in and out of fullscreen, so we only close after a grace period.
   function checkStillHere() {
     clearTimeout(leaveTimer)
     leaveTimer = setTimeout(() => {
       if (!pip) return
-      if (performance.now() - fullscreenChangedAt < 1500) return checkStillHere()
+      if (performance.now() - fullscreenChangedAt < 2000) return checkStillHere()
       const here = !document.hidden && (document.hasFocus() || pip.document.hasFocus())
       if (!here) pip.close()
-    }, 500)
+    }, 1500)
   }
 
   function buildPanel() {
