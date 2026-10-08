@@ -1,4 +1,4 @@
-# Notion Presenter View
+# Slide Lookout
 
 A Chrome extension that shows the next slide of a Notion presentation in an always-on-top Document Picture-in-Picture window. It's plain JavaScript with no build step.
 
@@ -11,7 +11,7 @@ A Chrome extension that shows the next slide of a Notion presentation in an alwa
 - `icons/`: `icon.svg` is the source, and `scripts/icons.mjs` renders the PNGs.
 - `test/mock-notion.html`: a stand-in for a Notion page in presentation mode, copied from the markup of Notion's `PagePresentationMode` chunk.
 - `test/run.mjs`: loads the extension into Playwright's Chromium, serves the mock at `app.notion.com` and checks a whole presentation.
-- `scripts/build-release.sh`: zips the extension into `dist/Notion-Presenter-View-<version>.zip`.
+- `scripts/build-release.sh`: zips the extension into `dist/Slide-Lookout-<version>.zip`.
 - `scripts/banner.html` and `scripts/render-banner.mjs`: the README banner, rendered to `docs/banner.png`.
 
 ## Build and run
@@ -21,7 +21,7 @@ npm install                          # Playwright, for the test, the banner and 
 npx playwright install chromium      # the browser they run in
 npm test                             # a whole presentation on the mock page, screenshots in test/screenshots
 node test/run.mjs <folder>           # the same test on another copy, like an unzipped release
-scripts/build-release.sh             # dist/Notion-Presenter-View-<version>.zip and its SHA-256
+scripts/build-release.sh             # dist/Slide-Lookout-<version>.zip and its SHA-256
 npm run banner                       # docs/banner.png at 2x
 npm run icons                        # icons/icon-*.png from icons/icon.svg
 ```
@@ -38,4 +38,4 @@ To try a change in your own Chrome, open `chrome://extensions`, turn on Develope
 - Don't add sites beyond Notion's three domains. The content script runs on them only to show the corner button, and every extra site adds to the warning Chrome shows at install.
 - Headless Chromium keeps every tab visible and focused, so the test fakes `document.hidden` and `hasFocus()` to check that the panel closes when you leave. Check real tab and app switches by hand, including starting fullscreen with the panel open: focus can flicker during the macOS fullscreen animation, which is why `checkStillHere` waits after a fullscreen change.
 - The version in `manifest.json` and `package.json` must equal the release tag without the `v`. Releases attach the zip from `scripts/build-release.sh`, built from the tagged commit.
-- The showreel video lives on flaviocopes.com, not in this repo. A local copy at `/notion-presenter-view-showreel.mp4` is ignored by git.
+- The showreel video lives on flaviocopes.com, not in this repo. A local copy at `/slide-lookout-showreel.mp4` is ignored by git.

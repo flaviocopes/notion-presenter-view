@@ -1,28 +1,28 @@
-<img src="docs/banner.png" alt="Notion Presenter View, a Chrome extension that shows the next slide of a Notion presentation" />
+<img src="docs/banner.png" alt="Slide Lookout, a Chrome extension that shows the next slide of a Notion presentation" />
 
-Notion Presenter View is a Chrome extension that shows the next slide of a Notion presentation in a small floating window. The window stays on top of the fullscreen slides, so you always know what's coming.
+Slide Lookout is a Chrome extension that shows the next slide of a Notion presentation in a small floating window. The window stays on top of the fullscreen slides, so you always know what's coming.
 
 Notion's presentation mode turns a page into slides, split at each divider. You see exactly what the audience sees, one slide at a time. There's no presenter view with the next slide, like Keynote and PowerPoint have, so this extension adds one.
 
-Read the announcement and watch the 30-second demo on my blog: [I built Notion Presenter View, a Chrome extension that shows your next slide](https://flaviocopes.com/notion-presenter-view/).
+Read the announcement and watch the 30-second demo on my blog: [I built Slide Lookout, a Chrome extension that shows your next slide](https://flaviocopes.com/slide-lookout/).
 
-[![Watch the 30-second Notion Presenter View demo](docs/showreel-poster.jpg)](https://flaviocopes.com/notion-presenter-view/)
+[![Watch the 30-second Slide Lookout demo](docs/showreel-poster.jpg)](https://flaviocopes.com/slide-lookout/)
 
 ## Install
 
-Notion Presenter View isn't on the Chrome Web Store, so you load it into Chrome yourself. It takes a minute.
+Slide Lookout isn't on the Chrome Web Store, so you load it into Chrome yourself. It takes a minute.
 
-1. Get `Notion-Presenter-View-1.1.0.zip` from the [latest release](https://github.com/flaviocopes/notion-presenter-view/releases/latest) and unzip it.
-2. Move the `Notion-Presenter-View-1.1.0` folder somewhere it can stay, like your Documents folder. Chrome runs the extension from that folder, so if you delete it, the extension is gone.
+1. Get `Slide-Lookout-1.2.0.zip` from the [latest release](https://github.com/flaviocopes/slide-lookout/releases/latest) and unzip it.
+2. Move the `Slide-Lookout-1.2.0` folder somewhere it can stay, like your Documents folder. Chrome runs the extension from that folder, so if you delete it, the extension is gone.
 3. Open `chrome://extensions` and turn on **Developer mode** in the top right corner.
 4. Click **Load unpacked** and pick that folder.
-5. Click the puzzle icon in the toolbar and pin Notion Presenter View, so it's one click away.
+5. Click the puzzle icon in the toolbar and pin Slide Lookout, so it's one click away.
 
 It needs Chrome 116 or later, and Notion in the browser. Notion's desktop app isn't Chrome, so the extension can't run there.
 
 ### Updates
 
-An extension you load this way doesn't update on its own. When there's a new release, unzip it and copy its files into your Notion Presenter View folder, replacing the old ones. Then click the reload arrow on its card in `chrome://extensions`. Since the folder is the same, Chrome keeps your shortcut and the pinned button.
+An extension you load this way doesn't update on its own. When there's a new release, unzip it and copy its files into your Slide Lookout folder, replacing the old ones. Then click the reload arrow on its card in `chrome://extensions`. Since the folder is the same, Chrome keeps your shortcut and the pinned button.
 
 To hear about new versions, click **Watch** on this repo, then **Custom** and **Releases**.
 
@@ -66,7 +66,7 @@ With a projector, set it up as a second display, put the slides on the projector
 
 ## Privacy
 
-Notion Presenter View runs on Notion pages only: `notion.so`, `notion.com` and `notion.site`. It needs them to show the **Open presenter view** button while you present, so when you install it, Chrome says it can "read and change your data" on those sites. It also asks for `activeTab` and `scripting`, which let the shortcut and the toolbar button open the panel.
+Slide Lookout runs on Notion pages only: `notion.so`, `notion.com` and `notion.site`. It needs them to show the **Open presenter view** button while you present, so when you install it, Chrome says it can "read and change your data" on those sites. It also asks for `activeTab` and `scripting`, which let the shortcut and the toolbar button open the panel.
 
 It reads the slides Notion already has in the page and adds the corner button. It doesn't change your pages, it never goes online, and there are no accounts or analytics.
 
@@ -82,7 +82,7 @@ To make the release zip, run:
 scripts/build-release.sh
 ```
 
-It copies the extension files into `dist/Notion-Presenter-View-<version>.zip` and prints its SHA-256. The same commit always gives the same zip, so you can check that a release matches its tag.
+It copies the extension files into `dist/Slide-Lookout-<version>.zip` and prints its SHA-256. The same commit always gives the same zip, so you can check that a release matches its tag.
 
 ## Development
 

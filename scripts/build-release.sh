@@ -1,12 +1,12 @@
 #!/bin/sh
-# Zips the extension into dist/Notion-Presenter-View-<version>.zip, a folder ready for Load unpacked.
+# Zips the extension into dist/Slide-Lookout-<version>.zip, a folder ready for Load unpacked.
 set -e
 cd "$(dirname "$0")/.."
 export TZ=UTC
 
 version=$(node -p "require('./manifest.json').version")
 icons=$(node -p "[...new Set(Object.values(require('./manifest.json').icons))].join(' ')")
-name="Notion-Presenter-View-$version"
+name="Slide-Lookout-$version"
 stage="dist/$name"
 
 rm -rf dist

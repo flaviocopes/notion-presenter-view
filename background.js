@@ -14,5 +14,5 @@ chrome.action.onClicked.addListener((tab) => {
       world: 'MAIN',
       files: ['presenter.js', 'toggle.js'],
     })
-    .catch((error) => console.warn('Notion Presenter View:', error))
+    .catch((error) => console.warn('Slide Lookout:', error))
 })

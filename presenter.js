@@ -139,7 +139,7 @@
   async function open() {
     if (opening) return
     if (!window.documentPictureInPicture) {
-      alert('Notion Presenter View needs Chrome 116 or later.')
+      alert('Slide Lookout needs Chrome 116 or later.')
       return
     }
 
@@ -152,7 +152,7 @@
         disallowReturnToOpener: true,
       })
     } catch (error) {
-      console.warn('Notion Presenter View: could not open the panel.', error)
+      console.warn('Slide Lookout: could not open the panel.', error)
       return
     } finally {
       opening = false
